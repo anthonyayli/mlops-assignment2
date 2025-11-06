@@ -59,16 +59,6 @@ def preprocess_data(train_path: str, test_path: str) -> pd.DataFrame:
     return df
 
 
-def prepare_train_test_data(df_processed: pd.DataFrame) -> tuple:
-    train_data = df_processed.dropna(subset=['Survived']).copy()
-    train_data['Survived'] = train_data['Survived'].astype('int64')
-    train_data = train_data.drop("PassengerId", axis=1)
-    
-    test_data = df_processed[df_processed['Survived'].isna()].copy()
-    test_data = test_data.drop("PassengerId", axis=1)
-    test_data = test_data.drop("Survived", axis=1)
-    
-    return train_data, test_data
 
 
 def build_parser() -> argparse.ArgumentParser:
