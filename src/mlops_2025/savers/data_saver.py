@@ -13,20 +13,23 @@ class DataSaver(BaseSaver):
     """
 
     def save(self, data: pd.DataFrame, path: str, **kwargs) -> None:
-        """Save a pandas DataFrame to a CSV file.
+        """Save a pandas DataFrame or Series to a CSV file.
         
         Args:
-            data: pandas.DataFrame to save
+            data: pandas.DataFrame or pandas.Series to save
             path: Path to the CSV file where data should be saved
             **kwargs: Additional arguments passed to pd.DataFrame.to_csv()
                 (e.g., index, sep, encoding, etc.)
             
         Raises:
-            ValueError: If data is not a pandas DataFrame
+            ValueError: If data is not a pandas DataFrame or Series
             IOError: If the file cannot be written
         """
-        if not isinstance(data, pd.DataFrame):
-            raise ValueError(f"Data must be a pandas DataFrame, got {type(data)}")
+        # Convert Series to DataFrame if needed
+        if isinstance(data, pd.Series):
+            data = pd.DataFrame(data)
+        elif not isinstance(data, pd.DataFrame):
+            raise ValueError(f"Data must be a pandas DataFrame or Series, got {type(data)}")
         
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(path), exist_ok=True) if os.path.dirname(path) else None
