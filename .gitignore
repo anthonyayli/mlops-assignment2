@@ -213,4 +213,3 @@ data/
 *.pkl
 *.csv
 output/
-metrics/
