@@ -1,0 +1,20 @@
+questions.txt
+
+Question: What can we still improve?
+
+Answer:
+1. Add configuration files (YAML/JSON) instead of hardcoded parameters
+2. Implement logging instead of print statements for better debugging
+3. Add unit tests for each class and function
+4. Add data validation (schema checking for input data)
+5. Implement error handling and exception management
+6. Add model versioning and experiment tracking (MLflow, Weights & Biases)
+7. Create a central configuration class for paths and hyperparameters
+8. Add cross-validation for better model evaluation
+9. Implement feature importance analysis
+10. Add data drift detection for production monitoring
+11. Create Docker containers for reproducibility
+12. Add comprehensive documentation (docstrings, README)
+13. Implement model registry for managing multiple model versions
+14. Add pipeline orchestration (Airflow, Prefect)
+15. Separate data validation as its own step
