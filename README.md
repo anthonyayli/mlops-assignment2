@@ -47,3 +47,23 @@ Runs the complete MLOps pipeline using classes from `mlops_2025` module. Execute
 ```bash
 ./runners/run_pipeline_with_classes.sh
 ```
+
+## Architecture
+
+### Loaders (`mlops_2025.loaders`)
+
+Abstract base class `BaseLoader` with `load()` method. Implementations:
+
+- **DataLoader**: Loads CSV files into pandas DataFrames
+- **TransformersLoader**: Loads pickle files containing transformer objects (can load single or all from directory)
+- **ModelLoader**: Loads pickle files containing trained models
+
+### Savers (`mlops_2025.savers`)
+
+Abstract base class `BaseSaver` with `save()` method. Implementations:
+
+- **DataSaver**: Saves pandas DataFrames/Series to CSV files
+- **TransformersSaver**: Saves transformer objects to pickle files (can save single or multiple to directory)
+- **ModelSaver**: Saves trained model objects to pickle files
+
+All pipeline components use these loaders and savers for consistent data I/O operations.
