@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # MLOps Pipeline Script
-# Runs the complete pipeline: preprocessing -> feature extraction -> training -> evaluation
-# Excludes predict.py as requested
+# Runs the complete pipeline: preprocessing -> feature extraction -> training -> evaluation -> prediction
+# Uses predict.py on the preprocessed test data from processed_data.csv
 
 set -e  # Exit on any error
 
@@ -24,6 +24,7 @@ OUTPUT_DIR="${OUTPUT_DIR:-output}"
 MODELS_DIR="${MODELS_DIR:-models}"
 TRANSFORMERS_DIR="${TRANSFORMERS_DIR:-transformers}"
 METRICS_DIR="${METRICS_DIR:-metrics}"
+PREDICTIONS_DIR="${PREDICTIONS_DIR:-predictions}"
 
 # Input data files
 TRAIN_CSV="${TRAIN_CSV:-${DATA_DIR}/train.csv}"
@@ -43,12 +44,16 @@ TRANSFORMERS_OUTPUT="${TRANSFORMERS_DIR}"
 # Metrics output
 METRICS_OUTPUT="${METRICS_DIR}/metrics.json"
 
+# Predictions output
+PREDICTIONS_OUTPUT="${PREDICTIONS_DIR}/predictions.csv"
+
 # Create necessary directories
 echo -e "${GREEN}Creating output directories...${NC}"
 mkdir -p "${OUTPUT_DIR}"
 mkdir -p "${MODELS_DIR}"
 mkdir -p "${TRANSFORMERS_DIR}"
 mkdir -p "${METRICS_DIR}"
+mkdir -p "${PREDICTIONS_DIR}"
 
 # Check if input files exist
 if [ ! -f "${TRAIN_CSV}" ]; then
@@ -141,6 +146,24 @@ fi
 echo -e "${GREEN}Evaluation completed successfully!${NC}"
 echo ""
 
+# Step 5: Prediction on Preprocessed Test Data
+echo -e "${YELLOW}========================================${NC}"
+echo -e "${YELLOW}Step 5: Prediction on Preprocessed Test Data${NC}"
+echo -e "${YELLOW}========================================${NC}"
+uv run python scripts/predict.py \
+    --model "${MODEL_PATH}" \
+    --processed-data "${PROCESSED_DATA}" \
+    --transformers-dir "${TRANSFORMERS_OUTPUT}" \
+    --output "${PREDICTIONS_OUTPUT}"
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Prediction failed!${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Prediction completed successfully!${NC}"
+echo ""
+
 # Summary
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Pipeline completed successfully!${NC}"
@@ -155,5 +178,6 @@ echo "  - Test labels: ${TEST_LABELS}"
 echo "  - Model: ${MODEL_PATH}"
 echo "  - Transformers: ${TRANSFORMERS_OUTPUT}/"
 echo "  - Metrics: ${METRICS_OUTPUT}"
+echo "  - Predictions (on preprocessed test data): ${PREDICTIONS_OUTPUT}"
 echo ""
 

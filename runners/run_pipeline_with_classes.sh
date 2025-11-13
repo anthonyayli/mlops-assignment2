@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # MLOps Pipeline Script using mlops_2025 classes
-# Runs the complete pipeline: preprocessing -> feature extraction -> training (3 models) -> evaluation
+# Runs the complete pipeline: preprocessing -> feature extraction -> training (3 models) -> evaluation -> prediction
 # Uses classes from mlops_2025 module
+# Uses predict.py on the preprocessed test data from processed_data.csv for all 3 models
 
 set -e  # Exit on any error
 
@@ -25,6 +26,7 @@ OUTPUT_DIR="${OUTPUT_DIR:-output}"
 MODELS_DIR="${MODELS_DIR:-models}"
 TRANSFORMERS_DIR="${TRANSFORMERS_DIR:-transformers}"
 METRICS_DIR="${METRICS_DIR:-metrics}"
+PREDICTIONS_DIR="${PREDICTIONS_DIR:-predictions}"
 
 # Input data files
 TRAIN_CSV="${TRAIN_CSV:-${DATA_DIR}/train.csv}"
@@ -50,12 +52,18 @@ METRICS_LR="${METRICS_DIR}/metrics_logistic_regression.json"
 METRICS_XGB="${METRICS_DIR}/metrics_xgboost.json"
 METRICS_RF="${METRICS_DIR}/metrics_random_forest.json"
 
+# Predictions outputs
+PREDICTIONS_LR="${PREDICTIONS_DIR}/predictions_logistic_regression.csv"
+PREDICTIONS_XGB="${PREDICTIONS_DIR}/predictions_xgboost.csv"
+PREDICTIONS_RF="${PREDICTIONS_DIR}/predictions_random_forest.csv"
+
 # Create necessary directories
 echo -e "${GREEN}Creating output directories...${NC}"
 mkdir -p "${OUTPUT_DIR}"
 mkdir -p "${MODELS_DIR}"
 mkdir -p "${TRANSFORMERS_DIR}"
 mkdir -p "${METRICS_DIR}"
+mkdir -p "${PREDICTIONS_DIR}"
 
 # Check if input files exist
 if [ ! -f "${TRAIN_CSV}" ]; then
@@ -220,6 +228,60 @@ fi
 echo -e "${GREEN}Random Forest evaluation completed successfully!${NC}"
 echo ""
 
+# Step 5: Prediction on Preprocessed Test Data - Logistic Regression
+echo -e "${YELLOW}========================================${NC}"
+echo -e "${YELLOW}Step 5a: Prediction on Preprocessed Test Data (Logistic Regression)${NC}"
+echo -e "${YELLOW}========================================${NC}"
+uv run python scripts/predict.py \
+    --model "${LOGISTIC_REGRESSION_MODEL}" \
+    --processed-data "${PROCESSED_DATA}" \
+    --transformers-dir "${TRANSFORMERS_OUTPUT}" \
+    --output "${PREDICTIONS_LR}"
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Logistic Regression prediction failed!${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Logistic Regression prediction completed successfully!${NC}"
+echo ""
+
+# Step 5: Prediction on Preprocessed Test Data - XGBoost
+echo -e "${YELLOW}========================================${NC}"
+echo -e "${YELLOW}Step 5b: Prediction on Preprocessed Test Data (XGBoost)${NC}"
+echo -e "${YELLOW}========================================${NC}"
+uv run python scripts/predict.py \
+    --model "${XGBOOST_MODEL}" \
+    --processed-data "${PROCESSED_DATA}" \
+    --transformers-dir "${TRANSFORMERS_OUTPUT}" \
+    --output "${PREDICTIONS_XGB}"
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}XGBoost prediction failed!${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}XGBoost prediction completed successfully!${NC}"
+echo ""
+
+# Step 5: Prediction on Preprocessed Test Data - Random Forest
+echo -e "${YELLOW}========================================${NC}"
+echo -e "${YELLOW}Step 5c: Prediction on Preprocessed Test Data (Random Forest)${NC}"
+echo -e "${YELLOW}========================================${NC}"
+uv run python scripts/predict.py \
+    --model "${RANDOM_FOREST_MODEL}" \
+    --processed-data "${PROCESSED_DATA}" \
+    --transformers-dir "${TRANSFORMERS_OUTPUT}" \
+    --output "${PREDICTIONS_RF}"
+
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Random Forest prediction failed!${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}Random Forest prediction completed successfully!${NC}"
+echo ""
+
 # Summary
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}Pipeline completed successfully!${NC}"
@@ -245,5 +307,10 @@ echo "Metrics saved:"
 echo "  - Logistic Regression: ${METRICS_LR}"
 echo "  - XGBoost: ${METRICS_XGB}"
 echo "  - Random Forest: ${METRICS_RF}"
+echo ""
+echo "Predictions on preprocessed test data:"
+echo "  - Logistic Regression: ${PREDICTIONS_LR}"
+echo "  - XGBoost: ${PREDICTIONS_XGB}"
+echo "  - Random Forest: ${PREDICTIONS_RF}"
 echo ""
 
