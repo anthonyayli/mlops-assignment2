@@ -23,7 +23,7 @@ Runs the complete MLOps pipeline using classes from `mlops_2025` module. Execute
      - Filters training data (rows with `Survived` labels)
      - **Excludes preprocessed test data** (rows where `Survived` is NaN)
      - Splits training data into train/test (80/20) for validation
-     - **Fits transformers ONLY on training data** (`num_cat_transformer`, `bins_transformer`)
+     - **!!!!!!Fits transformers ONLY on training data** (`num_cat_transformer`, `bins_transformer`)
      - Transforms training features only
    - **Output:**
      - `output/train_features.csv` (transformed)
